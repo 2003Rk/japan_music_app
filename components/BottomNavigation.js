@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
 
@@ -16,8 +16,17 @@ const BottomNavItem = ({ iconName, label, onPress, onPressIn, isActive }) => (
   </TouchableOpacity>
 );
 
-const BottomNavigation = ({ onNavigate }) => {
-  const [activeTab, setActiveTab] = useState('music'); // Default to music tab
+const BottomNavigation = ({ onNavigate, currentScreen }) => {
+  const [activeTab, setActiveTab] = useState(currentScreen || 'notice'); // Use currentScreen prop
+
+  // Update local state when currentScreen prop changes
+  useEffect(() => {
+    if (currentScreen) {
+      // Map 'notics' to 'notice' for the active state
+      const mappedScreen = currentScreen === 'notics' ? 'notice' : currentScreen;
+      setActiveTab(mappedScreen);
+    }
+  }, [currentScreen]);
 
   // Immediate state updates for instant visual feedback
   const handleMusicPressIn = () => {

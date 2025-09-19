@@ -1,18 +1,18 @@
 import { LinearGradient } from "expo-linear-gradient";
 import {
-    Image,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
+  Image,
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import Icon from "react-native-vector-icons/Feather";
 import BottomNavigation from "../../components/BottomNavigation";
 import Header from "../../components/Header";
 
-const NoticesScreen = ({ onNavigate }) => {
+const NoticesScreen = ({ onNavigate, currentScreen }) => {
   const songList = [
     { number: 1, title: "花びらの記憶", artist: "山本 遥" },
     { number: 2, title: "Silent Echo", artist: "高橋 颯" },
@@ -146,7 +146,7 @@ const NoticesScreen = ({ onNavigate }) => {
         </View>
 
         {/* Fixed Bottom Navigation */}
-        <BottomNavigation onNavigate={onNavigate} />
+        <BottomNavigation onNavigate={onNavigate} currentScreen={currentScreen} />
       </LinearGradient>
     </View>
   );

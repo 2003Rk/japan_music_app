@@ -1,6 +1,6 @@
 import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Image,
@@ -15,12 +15,14 @@ import {
 import BottomNavigation from "../../components/BottomNavigation";
 import Header from "../../components/Header";
 
-const MusicPlayerScreen = ({ onNavigate }) => {
+const MusicPlayerScreen = ({ onNavigate, currentScreen }) => {
   const [focusedTrack, setFocusedTrack] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
   const scrollViewRef = useRef(null);
   const [sound, setSound] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const scrollY = useRef(new Animated.Value(0)).current;
+  const isScrolling = useRef(false);
 
   // Audio setup
   useEffect(() => {
@@ -110,13 +112,10 @@ const MusicPlayerScreen = ({ onNavigate }) => {
     }
   };
 
-  const handleTrackChange = async (newTrackIndex) => {
+  const handleTrackChange = useCallback(async (newTrackIndex) => {
+    if (newTrackIndex === focusedTrack) return;
+    
     setFocusedTrack(newTrackIndex);
-
-    if (sound && isPlaying) {
-      await sound.pauseAsync();
-      setIsPlaying(false);
-    }
 
     if (scrollViewRef.current) {
       const trackHeight = 65;
@@ -124,14 +123,22 @@ const MusicPlayerScreen = ({ onNavigate }) => {
       const totalTrackHeight = trackHeight + marginBottom;
       const scrollPosition = newTrackIndex * totalTrackHeight - 50;
 
+      isScrolling.current = true;
       scrollViewRef.current.scrollTo({
         y: Math.max(0, scrollPosition),
         animated: true,
       });
+      
+      // Reset scrolling flag after animation completes
+      setTimeout(() => {
+        isScrolling.current = false;
+      }, 300);
     }
-  };
+  }, [focusedTrack]);
 
-  const handleScroll = async (event) => {
+  const handleScroll = useCallback((event) => {
+    if (isScrolling.current) return;
+    
     const scrollY = event.nativeEvent.contentOffset.y;
     const containerHeight = event.nativeEvent.layoutMeasurement.height;
 
@@ -146,12 +153,12 @@ const MusicPlayerScreen = ({ onNavigate }) => {
 
     if (clampedTrack !== focusedTrack) {
       setFocusedTrack(clampedTrack);
-      if (sound && isPlaying) {
-        await sound.pauseAsync();
-        setIsPlaying(false);
-      }
     }
-  };
+  }, [focusedTrack, musicTracks.length]);
+
+  const handleScrollEnd = useCallback(() => {
+    isScrolling.current = false;
+  }, []);
 
   const handlePlayPress = async (trackIndex) => {
     if (trackIndex === focusedTrack) {
@@ -187,10 +194,14 @@ const MusicPlayerScreen = ({ onNavigate }) => {
                 style={styles.scrollContent}
                 contentContainerStyle={styles.contentContainer}
                 onScroll={handleScroll}
+                onScrollEndDrag={handleScrollEnd}
+                onMomentumScrollEnd={handleScrollEnd}
                 scrollEventThrottle={16}
                 showsVerticalScrollIndicator={false}
                 bounces={true}
-                decelerationRate="normal"
+                decelerationRate="fast"
+                snapToInterval={68} // Height of track + margin
+                snapToAlignment="start"
               >
                 {musicTracks.map((track, index) => {
                   const distance = Math.abs(index - focusedTrack);
@@ -269,7 +280,7 @@ const MusicPlayerScreen = ({ onNavigate }) => {
             </View>
 
             <View style={styles.bottomNavWrapper}>
-              <BottomNavigation onNavigate={onNavigate} />
+              <BottomNavigation onNavigate={onNavigate} currentScreen={currentScreen} />
             </View>
 
             <DraggableCD
@@ -392,6 +403,9 @@ const DraggableCD = ({ focusedTrack, totalTracks, onTrackChange }) => {
   );
 };
 
+
+
+// Styles remain the same as in your original code
 export default MusicPlayerScreen;
 
 
@@ -404,7 +418,7 @@ const styles = StyleSheet.create({
   baseRectangle: {
     flexDirection: "row",
     alignItems: "center",
-    marginVertical: 10,
+    marginVertical: 8,
     borderRadius: 10,
     overflow: "hidden",
     backgroundColor: "rgba(255,255,255,0.1)",

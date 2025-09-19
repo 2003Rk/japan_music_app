@@ -3,7 +3,7 @@ import { Image, ScrollView, StatusBar, StyleSheet, Text, View } from 'react-nati
 import BottomNavigation from '../../components/BottomNavigation';
 import Header from '../../components/Header';
 
-const NotificationScreen = ({ onNavigate }) => {
+const NotificationScreen = ({ onNavigate, currentScreen }) => {
   const FeaturedCard = () => (
     <View style={styles.featuredCard}>
       <View style={styles.featuredContent}>
@@ -127,7 +127,7 @@ const NotificationScreen = ({ onNavigate }) => {
           </ScrollView>
 
           {/* Bottom Navigation */}
-          <BottomNavigation onNavigate={onNavigate} />
+          <BottomNavigation onNavigate={onNavigate} currentScreen={currentScreen} />
         </View>
       </LinearGradient>
     </View>

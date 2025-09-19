@@ -62,13 +62,13 @@ const App = () => {
       {showSplash ? (
         <SplashScreen onFinish={handleSplashFinish} />
       ) : currentScreen === 'notice' ? (
-        <NotificationScreen onNavigate={handleNavigate} />
+        <NotificationScreen onNavigate={handleNavigate} currentScreen={currentScreen} />
       ) : currentScreen === 'notics' ? (
-        <NoticesScreen onNavigate={handleNavigate} />
+        <NoticesScreen onNavigate={handleNavigate} currentScreen={currentScreen} />
       ) : currentScreen === 'search' ? (
-        <SearchPage onNavigate={handleNavigate} />
+        <SearchPage onNavigate={handleNavigate} currentScreen={currentScreen} />
       ) : (
-        <MusicPlayerScreen onNavigate={handleNavigate} />
+        <MusicPlayerScreen onNavigate={handleNavigate} currentScreen={currentScreen} />
       )}
     </>
   );

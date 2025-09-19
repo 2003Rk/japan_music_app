@@ -12,7 +12,7 @@ import Icon from 'react-native-vector-icons/Feather';
 import BottomNavigation from "../../components/BottomNavigation";
 import Header from "../../components/Header";
 
-const SearchPage = ({ onNavigate }) => {
+const SearchPage = ({ onNavigate, currentScreen }) => {
   return (
     <>
       <StatusBar hidden={true} />
@@ -180,7 +180,7 @@ const SearchPage = ({ onNavigate }) => {
             </View>
 
             {/* Bottom Navigation */}
-            <BottomNavigation onNavigate={onNavigate} />
+            <BottomNavigation onNavigate={onNavigate} currentScreen={currentScreen} />
           </View>
         </LinearGradient>
       </View>
