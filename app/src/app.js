@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Animated, Image, StatusBar, StyleSheet, Text } from 'react-native';
 import MusicPlayerScreen from './musicplayer';
 import NotificationScreen from './noticescreen';
+import NoticesScreen from './notics';
 import SearchPage from './searchpage';
 
 const SplashScreen = ({ onFinish }) => {
@@ -62,6 +63,8 @@ const App = () => {
         <SplashScreen onFinish={handleSplashFinish} />
       ) : currentScreen === 'notice' ? (
         <NotificationScreen onNavigate={handleNavigate} />
+      ) : currentScreen === 'notics' ? (
+        <NoticesScreen onNavigate={handleNavigate} />
       ) : currentScreen === 'search' ? (
         <SearchPage onNavigate={handleNavigate} />
       ) : (

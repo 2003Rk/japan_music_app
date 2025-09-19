@@ -3,7 +3,6 @@ import { LinearGradient } from "expo-linear-gradient";
 import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
-  Dimensions,
   Image,
   PanResponder,
   ScrollView,
@@ -11,7 +10,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import BottomNavigation from "../../components/BottomNavigation";
 import Header from "../../components/Header";
@@ -27,8 +26,8 @@ const MusicPlayerScreen = ({ onNavigate }) => {
   useEffect(() => {
     return sound
       ? () => {
-          sound.unloadAsync();
-        }
+        sound.unloadAsync();
+      }
       : undefined;
   }, [sound]);
 
@@ -44,19 +43,18 @@ const MusicPlayerScreen = ({ onNavigate }) => {
   }, []);
 
   const musicTracks = [
-    { id: 1, style: "smallRectangle", title: "Midnight Bloom", subtitle: "白石 結菜" },
-    { id: 2, style: "rectangle2", title: "遠い約束", subtitle: "Amber Tide" },
-    { id: 3, style: "rectangle3", title: "Silent Echo", subtitle: "高橋 颯" },
-    { id: 4, style: "rectangle4", title: "花びらの記憶", subtitle: "山本 遥" },
-    { id: 5, style: "rectangle5", title: "Neon Steps", subtitle: "佐藤 蓮" },
-    { id: 6, style: "rectangle6", title: "夢の続きまで", subtitle: "虹色シネマ" },
+    { id: 1, title: "Midnight Bloom", subtitle: "白石 結菜" },
+    { id: 2, title: "遠い約束", subtitle: "Amber Tide" },
+    { id: 3, title: "Silent Echo", subtitle: "高橋 颯" },
+    { id: 4, title: "花びらの記憶", subtitle: "山本 遥" },
+    { id: 5, title: "Neon Steps", subtitle: "佐藤 蓮" },
+    { id: 6, title: "夢の続きまで", subtitle: "虹色シネマ" },
   ];
 
   const playAudio = async () => {
     try {
       setIsLoading(true);
-      
-      // If audio is already playing, pause it
+
       if (sound && isPlaying) {
         await sound.pauseAsync();
         setIsPlaying(false);
@@ -64,7 +62,6 @@ const MusicPlayerScreen = ({ onNavigate }) => {
         return;
       }
 
-      // If audio exists but is paused, resume it
       if (sound && !isPlaying) {
         const status = await sound.getStatusAsync();
         if (status.isLoaded) {
@@ -75,25 +72,21 @@ const MusicPlayerScreen = ({ onNavigate }) => {
         return;
       }
 
-      // Load new audio
       const { sound: newSound } = await Audio.Sound.createAsync(
         require("../assets/namah_parvati.mp3"),
-        { shouldPlay: false }
+        { shouldPlay: true }
       );
-      
-      // Wait for the sound to be fully loaded before playing
+
       let attempts = 0;
-      const maxAttempts = 50; // 5 seconds max wait time
-      
+      const maxAttempts = 50;
+
       while (attempts < maxAttempts) {
         const status = await newSound.getStatusAsync();
         if (status.isLoaded) {
-          // Sound is loaded, now we can play it
           await newSound.playAsync();
           setSound(newSound);
           setIsPlaying(true);
-          
-          // Set up playback status update
+
           newSound.setOnPlaybackStatusUpdate((status) => {
             if (status.didJustFinish) {
               setIsPlaying(false);
@@ -101,19 +94,17 @@ const MusicPlayerScreen = ({ onNavigate }) => {
           });
           break;
         }
-        
-        // Wait 100ms before checking again
-        await new Promise(resolve => setTimeout(resolve, 100));
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
         attempts++;
       }
-      
+
       if (attempts >= maxAttempts) {
-        throw new Error('Sound took too long to load');
+        throw new Error("Sound took too long to load");
       }
-      
     } catch (error) {
-      console.error('Error playing audio:', error);
-      alert('Error playing audio. Please check if the file exists.');
+      console.error("Error playing audio:", error);
+      alert("Error playing audio. Please check if the file exists.");
     } finally {
       setIsLoading(false);
     }
@@ -121,20 +112,18 @@ const MusicPlayerScreen = ({ onNavigate }) => {
 
   const handleTrackChange = async (newTrackIndex) => {
     setFocusedTrack(newTrackIndex);
-    
-    // Stop current audio when changing tracks via CD
+
     if (sound && isPlaying) {
       await sound.pauseAsync();
       setIsPlaying(false);
     }
-    
-    // Scroll to the focused track with better calculation
+
     if (scrollViewRef.current) {
-      const trackHeight = 65; // Height of each rectangle
-      const marginBottom = 2; // Space between tracks  
+      const trackHeight = 65;
+      const marginBottom = 2;
       const totalTrackHeight = trackHeight + marginBottom;
-      const scrollPosition = newTrackIndex * totalTrackHeight - 50; // Offset to center better
-      
+      const scrollPosition = newTrackIndex * totalTrackHeight - 50;
+
       scrollViewRef.current.scrollTo({
         y: Math.max(0, scrollPosition),
         animated: true,
@@ -145,22 +134,18 @@ const MusicPlayerScreen = ({ onNavigate }) => {
   const handleScroll = async (event) => {
     const scrollY = event.nativeEvent.contentOffset.y;
     const containerHeight = event.nativeEvent.layoutMeasurement.height;
-    
-    // Since all rectangles are now the same size, we can use a simple calculation
-    const trackHeight = 65; // Height of each rectangle
-    const marginBottom = 3; // Space between tracks
+
+    const trackHeight = 65;
+    const marginBottom = 3;
     const totalTrackHeight = trackHeight + marginBottom;
-    
-    // Find which track the viewport center is currently over
+
     const viewportCenter = scrollY + containerHeight / 3;
     const newFocusedTrack = Math.floor(viewportCenter / totalTrackHeight);
-    
-    // Ensure we stay within bounds
+
     const clampedTrack = Math.max(0, Math.min(newFocusedTrack, musicTracks.length - 1));
 
     if (clampedTrack !== focusedTrack) {
       setFocusedTrack(clampedTrack);
-      // Stop playing when focus changes via scrolling
       if (sound && isPlaying) {
         await sound.pauseAsync();
         setIsPlaying(false);
@@ -170,17 +155,13 @@ const MusicPlayerScreen = ({ onNavigate }) => {
 
   const handlePlayPress = async (trackIndex) => {
     if (trackIndex === focusedTrack) {
-      // If clicking on the focused track, toggle play/pause
       await playAudio();
     } else {
-      // If clicking on a different track, focus it and start playing
       setFocusedTrack(trackIndex);
-      // Stop current audio if playing
       if (sound && isPlaying) {
         await sound.pauseAsync();
         setIsPlaying(false);
       }
-      // Start playing the new track
       await playAudio();
     }
   };
@@ -191,10 +172,8 @@ const MusicPlayerScreen = ({ onNavigate }) => {
       <View style={styles.container}>
         <LinearGradient colors={["#23386C", "#2A79B1"]} style={styles.gradient}>
           <View style={styles.content}>
-            {/* Header */}
             <Header />
 
-            {/* Title */}
             <View style={styles.titleContainer}>
               <View style={styles.playlistContainer}>
                 <Text style={styles.playlistText}>Playlist</Text>
@@ -202,7 +181,6 @@ const MusicPlayerScreen = ({ onNavigate }) => {
               <Text style={styles.title}>星空キャンバス</Text>
             </View>
 
-            {/* Scrollable Music Containers */}
             <View style={styles.musicContainer}>
               <ScrollView
                 ref={scrollViewRef}
@@ -215,25 +193,26 @@ const MusicPlayerScreen = ({ onNavigate }) => {
                 decelerationRate="normal"
               >
                 {musicTracks.map((track, index) => {
-                  const isFocused = index === focusedTrack;
+                  const distance = Math.abs(index - focusedTrack);
+                  let rectStyle = styles.baseRectangle;
+                  if (distance === 0) rectStyle = { ...styles.baseRectangle, ...styles.focusedRectangle };
+                  else if (distance === 1) rectStyle = { ...styles.baseRectangle, ...styles.nearRectangle };
+                  else rectStyle = { ...styles.baseRectangle, ...styles.farRectangle };
+
                   return (
                     <View key={track.id} style={styles.rightRectangleContainer}>
                       <TouchableOpacity
-                        style={[
-                          styles[track.style],
-                          isFocused ? styles.focusedRectangle : styles.unfocusedRectangle,
-                        ]}
+                        style={rectStyle}
                         onPress={() => handlePlayPress(index)}
                       >
                         <Image
                           source={require("../assets/gabriel-silverio-K_b41GaWC5Y-unsplash.png")}
-                          style={styles.rectangleImage}
+                          style={styles.image}
                           resizeMode="cover"
                         />
-                        
-                        {/* Play/Pause Button - Only show when focused */}
-                        {isFocused && (
-                          <TouchableOpacity 
+
+                        {index === focusedTrack && (
+                          <TouchableOpacity
                             style={styles.playPauseButton}
                             onPress={(e) => {
                               e.stopPropagation();
@@ -242,19 +221,17 @@ const MusicPlayerScreen = ({ onNavigate }) => {
                             disabled={isLoading}
                           >
                             <Text style={styles.playPauseIcon}>
-                              {isLoading ? "⏳" : (isPlaying ? "⏸" : "▶")}
+                              {isLoading ? "⏳" : isPlaying ? "⏸" : "▶"}
                             </Text>
                           </TouchableOpacity>
                         )}
-                        
-                        {/* Track Title and Subtitle */}
-                        <View style={styles.rectangleTitleContainer}>
-                          <Text style={styles.rectangleTitle}>{track.title}</Text>
-                          <Text style={styles.rectangleSubtitle}>{track.subtitle}</Text>
+
+                        <View style={styles.textContainer}>
+                          <Text style={styles.trackTitle}>{track.title}</Text>
+                          <Text style={styles.trackArtist}>{track.subtitle}</Text>
                         </View>
-                        
-                        {/* Playing Gradient Overlay */}
-                        {isFocused && isPlaying && (
+
+                        {index === focusedTrack && isPlaying && (
                           <LinearGradient
                             colors={[
                               "rgba(170, 55, 160, 0.6)",
@@ -266,15 +243,11 @@ const MusicPlayerScreen = ({ onNavigate }) => {
                           />
                         )}
                       </TouchableOpacity>
-
-                      {/* Track Info */}
-                      <View style={styles.trackInfo}>
-                        <Text style={styles.trackName}>{track.name}</Text>
-                      </View>
                     </View>
                   );
                 })}
               </ScrollView>
+
               <View style={styles.overlayContainer}>
                 <View style={styles.overlayContent}>
                   <Text style={styles.overlayText}>Artist's Messages</Text>
@@ -283,32 +256,27 @@ const MusicPlayerScreen = ({ onNavigate }) => {
                   </Text>
                   <TouchableOpacity style={styles.insideRoundButtonContainer}>
                     <LinearGradient
-                      colors={['#AA37A0', '#C76B6D']}
+                      colors={["#AA37A0", "#C76B6D"]}
                       start={{ x: 0, y: 0 }}
                       end={{ x: 1, y: 0 }}
                       style={styles.insideRoundButton}
                     >
-                      <Text style={styles.insideRoundButtonText}>
-                        アーティストの詳細
-                      </Text>
+                      <Text style={styles.insideRoundButtonText}>アーティストの詳細</Text>
                     </LinearGradient>
                   </TouchableOpacity>
                 </View>
               </View>
             </View>
 
-          
-            {/* Bottom Navigation */}
             <View style={styles.bottomNavWrapper}>
               <BottomNavigation onNavigate={onNavigate} />
             </View>
-            {/* Draggable CD Component */}
-            <DraggableCD 
+
+            <DraggableCD
               focusedTrack={focusedTrack}
               totalTracks={musicTracks.length}
               onTrackChange={handleTrackChange}
             />
-
           </View>
         </LinearGradient>
       </View>
@@ -316,9 +284,8 @@ const MusicPlayerScreen = ({ onNavigate }) => {
   );
 };
 
-// DraggableCD Component
+// DraggableCD Component (unchanged)
 const DraggableCD = ({ focusedTrack, totalTracks, onTrackChange }) => {
-  const { width } = Dimensions.get('window');
   const rotation = useRef(new Animated.Value(0)).current;
   const [isDragging, setIsDragging] = useState(false);
   const lastTrackChange = useRef(0);
@@ -332,27 +299,21 @@ const DraggableCD = ({ focusedTrack, totalTracks, onTrackChange }) => {
     },
     onPanResponderMove: (evt, gestureState) => {
       const deltaX = gestureState.dx;
-      
-      // Smooth rotation that follows finger movement
       rotation.setValue(deltaX * 0.8);
-      
-      // Track change logic with threshold
-      const trackChangeDistance = 70; // Distance needed to change one track
+
+      const trackChangeDistance = 70;
       const trackChanges = Math.floor(deltaX / trackChangeDistance);
-      
-      // Only change track if we've moved significantly since last change
+
       if (trackChanges !== lastTrackChange.current) {
         const difference = trackChanges - lastTrackChange.current;
         let newTrackIndex = focusedTrack;
-        
+
         if (difference > 0) {
-          // Moving right - go to previous tracks
           newTrackIndex = Math.max(focusedTrack - difference, 0);
         } else if (difference < 0) {
-          // Moving left - go to next tracks
           newTrackIndex = Math.min(focusedTrack - difference, totalTracks - 1);
         }
-        
+
         if (newTrackIndex !== focusedTrack) {
           onTrackChange(newTrackIndex);
           lastTrackChange.current = trackChanges;
@@ -362,8 +323,6 @@ const DraggableCD = ({ focusedTrack, totalTracks, onTrackChange }) => {
     onPanResponderRelease: () => {
       setIsDragging(false);
       lastTrackChange.current = 0;
-      
-      // Smooth spring back to center
       Animated.spring(rotation, {
         toValue: 0,
         useNativeDriver: true,
@@ -373,7 +332,6 @@ const DraggableCD = ({ focusedTrack, totalTracks, onTrackChange }) => {
     },
   });
 
-  // Create concentric circles for CD effect
   const renderConcentricCircles = (count, startSize, increment, opacity) => {
     return Array.from({ length: count }, (_, i) => (
       <View
@@ -401,8 +359,8 @@ const DraggableCD = ({ focusedTrack, totalTracks, onTrackChange }) => {
               {
                 rotate: rotation.interpolate({
                   inputRange: [-1000, 1000],
-                  outputRange: ['-1000deg', '1000deg'],
-                  extrapolate: 'extend',
+                  outputRange: ["-1000deg", "1000deg"],
+                  extrapolate: "extend",
                 }),
               },
             ],
@@ -411,49 +369,83 @@ const DraggableCD = ({ focusedTrack, totalTracks, onTrackChange }) => {
         ]}
         {...panResponder.panHandlers}
       >
-        {/* CD Container */}
         <View style={styles.cdDisc}>
-          {/* Outer ring */}
           <View style={styles.cdOuterRing}>
-            {/* More concentric circles - representing CD tracks */}
             {renderConcentricCircles(25, 20, 8, 0.4)}
-            
-            {/* Inner reflective area */}
+
             <View style={styles.cdInnerArea}>
-              {/* Even more concentric circles for inner area */}
               {renderConcentricCircles(22, 60, 10, 0.9)}
-              
-              {/* Center hole */}
+
               <View style={styles.cdCenterHole}>
-                {/* Inner hole highlight */}
                 <View style={styles.cdHoleHighlight} />
-                {/* Track indicator */}
                 <Text style={styles.trackIndicator}>{focusedTrack + 1}</Text>
               </View>
             </View>
           </View>
-          
-          {/* Holographic effect overlays */}
+
           <View style={styles.holographicOverlay1} />
           <View style={styles.holographicOverlay2} />
-          
-          {/* Light reflection */}
           <View style={styles.lightReflection} />
         </View>
       </Animated.View>
-      
-      {/* Instructions */}
-      
     </View>
   );
 };
 
 export default MusicPlayerScreen;
 
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#0A1A40",
   },
+  baseRectangle: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginVertical: 10,
+    borderRadius: 10,
+    overflow: "hidden",
+    backgroundColor: "rgba(255,255,255,0.1)",
+    padding: 10,
+  },
+  focusedRectangle: {
+    width: "100%",
+    opacity: 1,
+    transform: [{ scale: 1 }],
+  },
+  nearRectangle: {
+    width: "90%",
+    opacity: 0.8,
+    transform: [{ scale: 0.95 }],
+    alignSelf: "end",
+  },
+  farRectangle: {
+    width: "80%",
+    opacity: 0.6,
+    transform: [{ scale: 0.9 }],
+    alignSelf: "end",
+  },
+  image: {
+    width: 50,
+    height: 50,
+    borderRadius: 8,
+    marginRight: 10,
+  },
+  textContainer: {
+    flex: 1,
+  },
+  trackTitle: {
+    fontSize: 16,
+    color: "#fff",
+    fontWeight: "600",
+  },
+  trackArtist: {
+    fontSize: 14,
+    color: "#bbb",
+  },
+
   gradient: {
     flex: 1,
   },
@@ -668,7 +660,7 @@ const styles = StyleSheet.create({
     elevation: 10,
   },
   focusedRectangle: {
-    width: 320, // Increased width when focused
+    width: 340, // Increased width when focused
     transform: [{ scale: 1.05 }], // Slightly reduced scale since we're changing width
     borderWidth: 2,
     borderColor: "#FFFFFF",
@@ -680,7 +672,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255, 255, 255, 0.35)", // Brighter background when focused
   },
   unfocusedRectangle: {
-    width: 220, // Decreased width when unfocused
+    width: 340, // Decreased width when unfocused
     transform: [{ scale: 0.95 }], // Slightly reduced scale adjustment
     opacity: 0.6,
     backgroundColor: "rgba(255, 255, 255, 0.15)", // Dimmer background when unfocused
@@ -794,7 +786,7 @@ const styles = StyleSheet.create({
     height: 65,
     backgroundColor: "rgba(255, 255, 255, 0.2)",
     borderRadius: 8,
-   
+
     borderColor: "rgba(255, 255, 255, 0.3)",
     overflow: "hidden",
   },

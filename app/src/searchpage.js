@@ -73,10 +73,13 @@ const SearchPage = ({ onNavigate }) => {
                           <Text style={styles.playlistTitle}>花びらの行方</Text>
                           <Text style={styles.artistName}>Luna</Text>
                         </View>
-                        <View style={styles.songCount}>
+                        <TouchableOpacity
+                          style={styles.songCount}
+                          onPress={() => onNavigate && onNavigate('notics')}
+                        >
                           <Icon name="music" size={16} color="#666" />
                           <Text style={styles.songCountText}>12曲</Text>
-                        </View>
+                        </TouchableOpacity>
                       </View>
 
                       <View style={styles.playlistCard}>
@@ -84,10 +87,13 @@ const SearchPage = ({ onNavigate }) => {
                           <Text style={styles.playlistTitle}>Gentle Afterglow</Text>
                           <Text style={styles.artistName}>はる</Text>
                         </View>
-                        <View style={styles.songCount}>
+                        <TouchableOpacity
+                          style={styles.songCount}
+                          onPress={() => onNavigate && onNavigate('notics')}
+                        >
                           <Icon name="music" size={16} color="#666" />
                           <Text style={styles.songCountText}>8曲</Text>
-                        </View>
+                        </TouchableOpacity>
                       </View>
 
                       <View style={styles.playlistCard}>
@@ -95,10 +101,13 @@ const SearchPage = ({ onNavigate }) => {
                           <Text style={styles.playlistTitle}>記憶の花片</Text>
                           <Text style={styles.artistName}>Ren</Text>
                         </View>
-                        <View style={styles.songCount}>
+                        <TouchableOpacity
+                          style={styles.songCount}
+                          onPress={() => onNavigate && onNavigate('notics')}
+                        >
                           <Icon name="music" size={16} color="#666" />
                           <Text style={styles.songCountText}>15曲</Text>
-                        </View>
+                        </TouchableOpacity>
                       </View>
 
                       <TouchableOpacity style={styles.moreButton}>
@@ -123,10 +132,13 @@ const SearchPage = ({ onNavigate }) => {
                           <Text style={styles.playlistTitle}>青空キャンパス</Text>
                           <Text style={styles.artistName}>Sara</Text>
                         </View>
-                        <View style={styles.songCount}>
+                        <TouchableOpacity
+                          style={styles.songCount}
+                          onPress={() => onNavigate && onNavigate('notics')}
+                        >
                           <Icon name="music" size={16} color="#666" />
                           <Text style={styles.songCountText}>12曲</Text>
-                        </View>
+                        </TouchableOpacity>
                       </View>
 
                       <View style={styles.playlistCard}>
@@ -134,10 +146,13 @@ const SearchPage = ({ onNavigate }) => {
                           <Text style={styles.playlistTitle}>Flowers</Text>
                           <Text style={styles.artistName}>さくら</Text>
                         </View>
-                        <View style={styles.songCount}>
+                        <TouchableOpacity
+                          style={styles.songCount}
+                          onPress={() => onNavigate && onNavigate('notics')}
+                        >
                           <Icon name="music" size={16} color="#666" />
                           <Text style={styles.songCountText}>8曲</Text>
-                        </View>
+                        </TouchableOpacity>
                       </View>
 
                       <View style={styles.playlistCard}>
@@ -145,10 +160,13 @@ const SearchPage = ({ onNavigate }) => {
                           <Text style={styles.playlistTitle}>夜</Text>
                           <Text style={styles.artistName}>あきほ</Text>
                         </View>
-                        <View style={styles.songCount}>
+                        <TouchableOpacity
+                          style={styles.songCount}
+                          onPress={() => onNavigate && onNavigate('notics')}
+                        >
                           <Icon name="music" size={16} color="#666" />
                           <Text style={styles.songCountText}>15曲</Text>
-                        </View>
+                        </TouchableOpacity>
                       </View>
 
                       <TouchableOpacity style={styles.moreButton}>
