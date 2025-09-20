@@ -1,6 +1,6 @@
 import { Audio } from "expo-av";
 import { LinearGradient } from "expo-linear-gradient";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Animated,
   Image,
@@ -114,7 +114,7 @@ const MusicPlayerScreen = ({ onNavigate, currentScreen }) => {
 
   const handleTrackChange = useCallback(async (newTrackIndex) => {
     if (newTrackIndex === focusedTrack) return;
-    
+
     setFocusedTrack(newTrackIndex);
 
     if (scrollViewRef.current) {
@@ -128,7 +128,7 @@ const MusicPlayerScreen = ({ onNavigate, currentScreen }) => {
         y: Math.max(0, scrollPosition),
         animated: true,
       });
-      
+
       // Reset scrolling flag after animation completes
       setTimeout(() => {
         isScrolling.current = false;
@@ -138,7 +138,7 @@ const MusicPlayerScreen = ({ onNavigate, currentScreen }) => {
 
   const handleScroll = useCallback((event) => {
     if (isScrolling.current) return;
-    
+
     const scrollY = event.nativeEvent.contentOffset.y;
     const containerHeight = event.nativeEvent.layoutMeasurement.height;
 
@@ -299,47 +299,75 @@ const MusicPlayerScreen = ({ onNavigate, currentScreen }) => {
 const DraggableCD = ({ focusedTrack, totalTracks, onTrackChange }) => {
   const rotation = useRef(new Animated.Value(0)).current;
   const [isDragging, setIsDragging] = useState(false);
+
+  // displayTrack is used for the UI while dragging to avoid flicker
+  const [displayTrack, setDisplayTrack] = useState(focusedTrack);
+
+  // Keep refs for logic
   const lastTrackChange = useRef(0);
+  const baseTrack = useRef(focusedTrack);
+
+  // When parent updates focusedTrack while NOT dragging, reflect it in display
+  useEffect(() => {
+    if (!isDragging) {
+      setDisplayTrack(focusedTrack);
+      baseTrack.current = focusedTrack;
+    }
+  }, [focusedTrack, isDragging]);
 
   const panResponder = PanResponder.create({
     onMoveShouldSetPanResponder: () => true,
     onStartShouldSetPanResponder: () => true,
+
     onPanResponderGrant: () => {
       setIsDragging(true);
       lastTrackChange.current = 0;
+      baseTrack.current = focusedTrack; // snapshot start index
     },
+
     onPanResponderMove: (evt, gestureState) => {
       const deltaX = gestureState.dx;
       rotation.setValue(deltaX * 0.8);
 
-      const trackChangeDistance = 70;
+      const trackChangeDistance = 70; // pixels per track switch (tweakable)
+
+      // ---------- BUG FIX: use truncation toward zero for symmetry ----------
+      // Math.trunc ensures small left drags don't immediately become -1
       const trackChanges = Math.floor(deltaX / trackChangeDistance);
+      console.log("trackChanges", trackChanges)
+      console.log("displayTrack", displayTrack)
+      console.log("baseTrack.current", baseTrack.current)
+      if (trackChanges !== displayTrack) {
+        // ---------- BUG FIX: right should increase index ----------
+        let newTrackIndex = displayTrack + trackChanges;
+        console.log("lets call man", newTrackIndex)
 
-      if (trackChanges !== lastTrackChange.current) {
-        const difference = trackChanges - lastTrackChange.current;
-        let newTrackIndex = focusedTrack;
+        // clamp to valid range
+        newTrackIndex = Math.max(0, Math.min(totalTracks - 1, newTrackIndex));
 
-        if (difference > 0) {
-          newTrackIndex = Math.max(focusedTrack - difference, 0);
-        } else if (difference < 0) {
-          newTrackIndex = Math.min(focusedTrack - difference, totalTracks - 1);
-        }
+        // update local display immediately to avoid UI flicker
+        setDisplayTrack(newTrackIndex);
 
+        // notify parent only when index actually changes relative to prop
         if (newTrackIndex !== focusedTrack) {
           onTrackChange(newTrackIndex);
-          lastTrackChange.current = trackChanges;
         }
+
+        lastTrackChange.current = trackChanges;
       }
     },
+
     onPanResponderRelease: () => {
       setIsDragging(false);
       lastTrackChange.current = 0;
+
       Animated.spring(rotation, {
         toValue: 0,
         useNativeDriver: true,
         tension: 80,
         friction: 6,
       }).start();
+      // useEffect above will reset displayTrack to focusedTrack when dragging stops
     },
   });
 
@@ -389,7 +417,8 @@ const DraggableCD = ({ focusedTrack, totalTracks, onTrackChange }) => {
 
               <View style={styles.cdCenterHole}>
                 <View style={styles.cdHoleHighlight} />
-                <Text style={styles.trackIndicator}>{focusedTrack + 1}</Text>
+                {/* use displayTrack while dragging for stable UI */}
+                <Text style={styles.trackIndicator}>{displayTrack + 1}</Text>
               </View>
             </View>
           </View>
@@ -402,6 +431,7 @@ const DraggableCD = ({ focusedTrack, totalTracks, onTrackChange }) => {
     </View>
   );
 };
+
 
 
 
@@ -1031,13 +1061,13 @@ const styles = StyleSheet.create({
   },
   lightReflection: {
     position: 'absolute',
-    top: 12, // Adjusted proportionally
-    left: 24, // Adjusted proportionally
+    top: -10, // Adjusted proportionally
+    left: "44%", // Adjusted proportionally
     width: 48, // Increased from 32 to 48
     height: 96, // Increased from 64 to 96
     borderRadius: 24, // Half of width
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    transform: [{ rotate: '12deg' }],
+    // transform: [{ rotate: '5deg' }],
   },
   cdInstructions: {
     position: 'absolute',
